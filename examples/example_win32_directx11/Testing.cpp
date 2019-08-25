@@ -1,5 +1,6 @@
 #include "Testing.h"
 #include "imgui_internal.h"
+#include <iostream>
 
 
 Testing::Testing()
@@ -7,8 +8,8 @@ Testing::Testing()
     Animation<float>* a1 = new Animation<float>;
     a1->name = "Widget 1";
     a1->addTransformNode(VEC2(1.0f, 0.0f), 1.0f);
-    a1->addTransformNode(VEC2(2.0f, 0.0f), 2.0f);
-    a1->addTransformNode(VEC2(2.0f, 2.0f), 2.2f);
+    /*a1->addTransformNode(VEC2(2.0f, 0.0f), 2.0f);
+    a1->addTransformNode(VEC2(2.0f, 2.0f), 2.2f);*/
     _animations.push_back(a1);
 }
 
@@ -56,8 +57,9 @@ void Testing::Render( ) {
                     /* Node positioning info */
                     ImDrawList* draw_list = ImGui::GetWindowDrawList();
                     const ImVec2* p = &ImGui::GetCursorScreenPos();
-                    ImVec2          cursorPos = *p;
                     const float     nodeSize = 5.0f;
+                    ImVec2          cursorPos = *p;
+                    cursorPos.y += nodeSize;
                     ImGuiWindow* win = ImGui::GetCurrentWindow();
                     const float     timeline_radius = 6.0f;// max_time / 0.5f;
                     const ImU32 inactive_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
@@ -69,34 +71,29 @@ void Testing::Render( ) {
                         std::string popupId = std::to_string(_animations[x]->transformNodes[a].first.x)
                             + std::to_string(_animations[x]->transformNodes[a].first.y)
                             + std::to_string(_animations[x]->transformNodes[a].second);
+                        ImGui::PushID(popupId.c_str());
 
-                        cursorPos.x += win->Size.x * _animations[x]->transformNodes[a].second / max_time * timeline_radius;
-                        /*cursorPos.y += timeline_radius;*/
-
+                        cursorPos.x += win->Size.x * _animations[x]->transformNodes[a].second / max_time;
                         ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
-                        ImGui::PushID(a);
 
-                        ImGui::InvisibleButton(std::string(popupId + "invb").c_str(), ImVec2(2 * timeline_radius, 2 * timeline_radius));
-
-                        /*ImVec2 value_with_lock_threshold = ImGui::GetMouseDragDelta(0);
-                        if (value_with_lock_threshold.x)
-                            ImGui::Text("Drag delta: x: %.2f y: %.2f", value_with_lock_threshold.x, value_with_lock_threshold.y);*/
+                        ImGui::InvisibleButton("##Node", ImVec2(2 * timeline_radius, 2 * timeline_radius));
+                        //std::cout << "Item: "<< a <<"Is item active ? :" << (ImGui::IsItemActive() ? "true" : "false") << std::endl;
+                        if (ImGui::IsItemActive() && ImGui::GetMouseDragDelta().x > 0){
+                            _animations[x]->transformNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
+                            if (_animations[x]->transformNodes[a].second < 0.0f)
+                                _animations[x]->transformNodes[a].second = 0.0f;
+                        }
                         if (ImGui::IsItemHovered()) {
-                            //draw_list->AddCircleFilled(ImVec2(p->x + nodeSize, p->y + nodeSize), nodeSize, ImColor(1.0f, 0.0f, 0.0f, 1.0f), 20);
                             ImGui::BeginTooltip();
                             Animation<float>::displayTransformPopup(_animations[x]->transformNodes[a]);
                             ImGui::EndTooltip();
                         }
-                        if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0)) {
-                            _animations[x]->transformNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
-
-                        }
-                        ImGui::PopID();
                         draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
-
 
                         if (a != _animations[x]->transformNodes.size())
                             ImGui::SameLine();
+
+                        ImGui::PopID();
                     }
 
 
@@ -106,7 +103,7 @@ void Testing::Render( ) {
                     const float fwidth = ImGui::GetColumnWidth();
                     const float fheight = ImGui::GetContentRegionAvail().y;
                     for (auto lineHorizontalPos = 0.0f; lineHorizontalPos < max_time; lineHorizontalPos += 0.5f) {
-                        draw_list->AddLine(ImVec2((p->x + lineHorizontalPos)/fwidth  , p->y), ImVec2((p->x + lineHorizontalPos) / fwidth, p->y + fheight), ImColor(0.0f, 0.0f, 1.0f, 1.0f), 0.1);
+                        draw_list->AddLine(ImVec2((p->x + lineHorizontalPos)/fwidth  , p->y), ImVec2((p->x + lineHorizontalPos) / fwidth, p->y + fheight), ImColor(0.0f, 0.0f, 1.0f, 0.6f));
                     }
 
 
