@@ -21,14 +21,27 @@ struct Animation {
     void addColorNode(VEC4 new_color, float time) { colorNodes.push_back(std::pair<VEC4, float>(new_color, time)); }
     void addSpecialNode(SpecialNode new_special, float time) { specialNodes.push_back(std::pair<SpecialNode, float>(new_special, time)); }
 
-    static void displayTransformPopup(std::pair<VEC2, float> node) {
+    static void displayTransformPopup(std::pair<VEC2, float> node, int id) {
         ImGui::Text("Transform");
         ImGui::Text("");
+        ImGui::Text("Node: %d", id);
         ImGui::Text("X: %.2f  Y: %.2f", node.first.x, node.first.y);
         ImGui::Text("Time: %.2f", node.second);
     }
-    void displayScalePopup(){}
-    void displayColorPopup() {}
+    static void displayScalePopup(std::pair<VEC2, float> node, int id){
+        ImGui::Text("Scale");
+        ImGui::Text("");
+        ImGui::Text("Node: %d", id);
+        ImGui::Text("X: %.2f  Y: %.2f", node.first.x, node.first.y);
+        ImGui::Text("Time: %.2f", node.second);
+    }
+    static void displayColorPopup(std::pair<VEC4, float> node, int id) {
+        ImGui::Text("Color");
+        ImGui::Text("");
+        ImGui::Text("Node: %d", id);
+        ImGui::ColorEdit4("MyColor##2f", (float*)& node.first, ImGuiColorEditFlags_Float);
+        ImGui::Text("Time: %.2f", node.second);
+    }
     void displaySpecialPopup() {}
 
     std::string name;

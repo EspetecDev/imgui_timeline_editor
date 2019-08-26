@@ -8,8 +8,12 @@ Testing::Testing()
     Animation<float>* a1 = new Animation<float>;
     a1->name = "Widget 1";
     a1->addTransformNode(VEC2(1.0f, 0.0f), 1.0f);
-    /*a1->addTransformNode(VEC2(2.0f, 0.0f), 2.0f);
-    a1->addTransformNode(VEC2(2.0f, 2.0f), 2.2f);*/
+    a1->addTransformNode(VEC2(2.0f, 0.0f), 2.0f);
+    a1->addTransformNode(VEC2(2.0f, 2.0f), 2.2f);
+    a1->addScaleNode(VEC2(1.5f, 1.5f), 0.5f);
+    a1->addScaleNode(VEC2(0.5f, 0.5f), 2.0f);
+    a1->addColorNode(VEC4(1.0f, 0.0f, 0.0f, 1.0f), 1.0f);
+    a1->addColorNode(VEC4(0.0f, 1.0f, 0.0f, 1.0f), 2.0f);
     _animations.push_back(a1);
 }
 
@@ -65,19 +69,14 @@ void Testing::Render( ) {
                     const ImU32 inactive_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
                     const ImU32 active_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
                     ImGui::BeginChild("##ScrollingRegion", ImVec2(0, ImGui::GetFontSize() * 10), true, ImGuiWindowFlags_HorizontalScrollbar);
+                    
                     // Draw nodes for every animation type
                     for (auto a = 0; a < _animations[x]->transformNodes.size(); a++) {
-
-                        /*std::string popupId = std::to_string(_animations[x]->transformNodes[a].first.x)
-                            + std::to_string(_animations[x]->transformNodes[a].first.y)
-                            + std::to_string(_animations[x]->transformNodes[a].second);
-                        ImGui::PushID(popupId.c_str());*/
-
-                        cursorPos.x += win->Size.x * _animations[x]->transformNodes[a].second / max_time;
+                        ImGui::PushID(a);
+                        cursorPos.x = p->x + win->Size.x * _animations[x]->transformNodes[a].second / max_time;
                         ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
 
-                        ImGui::InvisibleButton("##Node", ImVec2(2 * timeline_radius, 2 * timeline_radius));
-                        //std::cout << "Item: "<< a <<"Is item active ? :" << (ImGui::IsItemActive() ? "true" : "false") << std::endl;
+                        ImGui::InvisibleButton(std::to_string(a).c_str(), ImVec2(2 * timeline_radius, 2 * timeline_radius));
                         if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0, 0.0f)){
                             _animations[x]->transformNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
                             if (_animations[x]->transformNodes[a].second < 0.0f)
@@ -85,17 +84,65 @@ void Testing::Render( ) {
                         }
                         if (ImGui::IsItemHovered()) {
                             ImGui::BeginTooltip();
-                            Animation<float>::displayTransformPopup(_animations[x]->transformNodes[a]);
+                            Animation<float>::displayTransformPopup(_animations[x]->transformNodes[a], a);
                             ImGui::EndTooltip();
                         }
                         draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
-
                         if (a != _animations[x]->transformNodes.size())
                             ImGui::SameLine();
 
-                        //ImGui::PopID();
+                        ImGui::PopID();
                     }
 
+                    cursorPos.y += 35.0f;
+                    // Draw nodes for every animation type
+                    for (auto a = 0; a < _animations[x]->scaleNodes.size(); a++) {
+                        ImGui::PushID(a+10);
+                        cursorPos.x = p->x + win->Size.x * _animations[x]->scaleNodes[a].second / max_time;
+                        ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
+
+                        ImGui::InvisibleButton(std::to_string(a).c_str(), ImVec2(2 * timeline_radius, 2 * timeline_radius));
+                        if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0, 0.0f)) {
+                            _animations[x]->scaleNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
+                            if (_animations[x]->scaleNodes[a].second < 0.0f)
+                                _animations[x]->scaleNodes[a].second = 0.0f;
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::BeginTooltip();
+                            Animation<float>::displayScalePopup(_animations[x]->scaleNodes[a], a);
+                            ImGui::EndTooltip();
+                        }
+                        draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
+                        if (a != _animations[x]->scaleNodes.size())
+                            ImGui::SameLine();
+
+                        ImGui::PopID();
+                    }
+
+                    cursorPos.y += 30.0f;
+                    // Draw nodes for every animation type
+                    for (auto a = 0; a < _animations[x]->colorNodes.size(); a++) {
+                        ImGui::PushID(a + 100);
+                        cursorPos.x = p->x + win->Size.x * _animations[x]->colorNodes[a].second / max_time;
+                        ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
+
+                        ImGui::InvisibleButton(std::to_string(a).c_str(), ImVec2(2 * timeline_radius, 2 * timeline_radius));
+                        if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0, 0.0f)) {
+                            _animations[x]->colorNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
+                            if (_animations[x]->colorNodes[a].second < 0.0f)
+                                _animations[x]->colorNodes[a].second = 0.0f;
+                        }
+                        if (ImGui::IsItemHovered()) {
+                            ImGui::BeginTooltip();
+                            Animation<float>::displayColorPopup(_animations[x]->colorNodes[a], a);
+                            ImGui::EndTooltip();
+                        }
+                        draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
+                        if (a != _animations[x]->colorNodes.size())
+                            ImGui::SameLine();
+
+                        ImGui::PopID();
+                    }
 
 
 
@@ -103,10 +150,10 @@ void Testing::Render( ) {
                     const float fwidth = ImGui::GetColumnWidth();
                     const float fheight = ImGui::GetContentRegionAvail().y;
                     for (auto lineHorizontalPos = 0.0f; lineHorizontalPos < max_time; lineHorizontalPos += 0.5f) {
-                        draw_list->AddLine(ImVec2((p->x + lineHorizontalPos)/fwidth  , p->y), ImVec2((p->x + lineHorizontalPos) / fwidth, p->y + fheight), ImColor(0.0f, 0.0f, 1.0f, 0.6f));
+                        draw_list->AddLine(ImVec2((cursorPos.x + win->Size.x * 0.5f) + lineHorizontalPos/ max_time  , cursorPos.y), ImVec2((cursorPos.x + win->Size.x * 0.5f) + lineHorizontalPos / max_time, cursorPos.y + fheight), ImColor(0.0f, 0.0f, 1.0f, 0.6f));
                     }
 
-
+                    
 
                     ImGui::EndChild();
                     ImGui::EndGroup();
