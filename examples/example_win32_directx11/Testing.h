@@ -45,7 +45,7 @@ public:
 	Testing();
 	~Testing();
     void Render();
-
+    float position = 2.0f;
 
 private:
     float max_time = 10.0f;

@@ -68,17 +68,17 @@ void Testing::Render( ) {
                     // Draw nodes for every animation type
                     for (auto a = 0; a < _animations[x]->transformNodes.size(); a++) {
 
-                        std::string popupId = std::to_string(_animations[x]->transformNodes[a].first.x)
+                        /*std::string popupId = std::to_string(_animations[x]->transformNodes[a].first.x)
                             + std::to_string(_animations[x]->transformNodes[a].first.y)
                             + std::to_string(_animations[x]->transformNodes[a].second);
-                        ImGui::PushID(popupId.c_str());
+                        ImGui::PushID(popupId.c_str());*/
 
                         cursorPos.x += win->Size.x * _animations[x]->transformNodes[a].second / max_time;
                         ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
 
                         ImGui::InvisibleButton("##Node", ImVec2(2 * timeline_radius, 2 * timeline_radius));
                         //std::cout << "Item: "<< a <<"Is item active ? :" << (ImGui::IsItemActive() ? "true" : "false") << std::endl;
-                        if (ImGui::IsItemActive() && ImGui::GetMouseDragDelta().x > 0){
+                        if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0, 0.0f)){
                             _animations[x]->transformNodes[a].second += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
                             if (_animations[x]->transformNodes[a].second < 0.0f)
                                 _animations[x]->transformNodes[a].second = 0.0f;
@@ -93,7 +93,7 @@ void Testing::Render( ) {
                         if (a != _animations[x]->transformNodes.size())
                             ImGui::SameLine();
 
-                        ImGui::PopID();
+                        //ImGui::PopID();
                     }
 
 

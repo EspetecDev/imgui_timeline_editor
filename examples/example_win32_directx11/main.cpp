@@ -11,6 +11,8 @@
 #include <vector>
 #include <string>
 #include "Testing.h"
+#include "imgui_internal.h"
+#include <iostream>
 
 // Data
 static ID3D11Device*            g_pd3dDevice = NULL;
@@ -139,13 +141,50 @@ int main(int, char**)
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
         float nodeSize = 5.0f;
         if (ImGui::Begin("testRender", &testRenderwindow)) {
-            ImGui::Bullet();
-            //draw_list->AddTriangle(p, ImVec2(p.x + 3.0f, p.y), ImVec2(p.x + 1.5f, p.y + 1.0f), ImColor(1.0f, 0.0f, 0.0f), 20);
-            draw_list->AddCircleFilled(ImVec2(p.x + 10.0f, p.y), nodeSize, ImColor(1.0f, 1.0f, 0.0f), 20);
-            draw_list->AddCircleFilled(ImVec2(p.x + 20.0f,p.y), nodeSize, ImColor(1.0f, 1.0f, 0.0f), 20);
-            draw_list->AddCircleFilled(ImVec2( p.x +30.0f,p.y), nodeSize, ImColor(1.0f, 1.0f, 0.0f), 20);
+
+
+            /* Node positioning info */
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+            const ImVec2* p = &ImGui::GetCursorScreenPos();
+            const float     nodeSize = 5.0f;
+            ImVec2          cursorPos = *p;
+            cursorPos.y += nodeSize;
+            ImGuiWindow* win = ImGui::GetCurrentWindow();
+            const float     timeline_radius = 6.0f;// max_time / 0.5f;
+            const ImU32 inactive_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
+            const ImU32 active_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
+            const float max_time = 10.f;
+
+            ImGui::BeginChild("##ScrollingRegion", ImVec2(0, ImGui::GetFontSize() * 10), true, ImGuiWindowFlags_HorizontalScrollbar);
+
+            //std::string popupId = std::to_string(1.0f);
+
+            cursorPos.x += win->Size.x * t.position / max_time;
+            ImGui::SetCursorScreenPos(cursorPos - ImVec2(timeline_radius, timeline_radius));
+
+            ImGui::InvisibleButton("##Node", ImVec2(2 * timeline_radius, 2 * timeline_radius));
+            //std::cout << "Item: "<< a <<"Is item active ? :" << (ImGui::IsItemActive() ? "true" : "false") << std::endl;
+            if (ImGui::IsItemActive() && ImGui::IsMouseDragging(0, 0.0f)) {
+                t.position += ImGui::GetIO().MouseDelta.x / win->Size.x * max_time;
+                std::cout << "Dragdelta x: " << ImGui::GetIO().MouseDelta.x / win->Size.x * max_time << std::endl;
+                std::cout << "IsMouseDragging:  " << (ImGui::IsMouseDragging(0, 0.0f) ? "true" : "false") << std::endl;
+                if (t.position < 0.0f)
+                    t.position = 0.0f;
+            }
+
+            draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
+
+
+            const float fwidth = ImGui::GetColumnWidth();
+            const float fheight = ImGui::GetContentRegionAvail().y;
+            for (auto lineHorizontalPos = 0.0f; lineHorizontalPos < max_time; lineHorizontalPos += 0.5f) {
+                draw_list->AddLine(ImVec2((p->x + lineHorizontalPos) / fwidth, p->y), ImVec2((p->x + lineHorizontalPos) / fwidth, p->y + fheight), ImColor(0.0f, 0.0f, 1.0f, 0.6f));
+            }
+            ImGui::EndChild();
+
             ImGui::End();
         }
+
         
 
 
