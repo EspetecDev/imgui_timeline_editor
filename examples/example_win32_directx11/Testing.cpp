@@ -64,11 +64,22 @@ void Testing::Render( ) {
                     const float     nodeSize = 5.0f;
                     ImVec2          cursorPos = *p;
                     cursorPos.y += nodeSize;
+                    ImVec2          initialPos = *p;
                     ImGuiWindow* win = ImGui::GetCurrentWindow();
                     const float     timeline_radius = 6.0f;// max_time / 0.5f;
                     const ImU32 inactive_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_Button]);
                     const ImU32 active_color = ImGui::ColorConvertFloat4ToU32(GImGui->Style.Colors[ImGuiCol_ButtonHovered]);
-                    ImGui::BeginChild("##ScrollingRegion", ImVec2(0, ImGui::GetFontSize() * 10), true, ImGuiWindowFlags_HorizontalScrollbar);
+                    ImGui::BeginChild("##ScrollingRegion", ImVec2(0, ImGui::GetFontSize() * 10), true, ImGuiWindowFlags_NoMove);
+
+
+                    
+                    
+                    const float fwidth = ImGui::GetColumnWidth();
+                    const float fheight = ImGui::GetContentRegionAvail().y;
+                    for (auto lineHorizontalPos = 0.0f; lineHorizontalPos < max_time; lineHorizontalPos += 0.5f) {
+                        cursorPos.x = p->x + win->Size.x * lineHorizontalPos / max_time;
+                        draw_list->AddLine(ImVec2(cursorPos.x, cursorPos.y - nodeSize), ImVec2(cursorPos.x, cursorPos.y + ImGui::GetFontSize() * 10 - nodeSize), inactive_color);
+                    }
                     
                     // Draw nodes for every animation type
                     for (auto a = 0; a < _animations[x]->transformNodes.size(); a++) {
@@ -86,6 +97,10 @@ void Testing::Render( ) {
                             ImGui::BeginTooltip();
                             Animation<float>::displayTransformPopup(_animations[x]->transformNodes[a], a);
                             ImGui::EndTooltip();
+                        }
+                        if (ImGui::BeginPopupContextItem(std::to_string(a).c_str())) {
+                            Animation<float>::displayTransformContextMenu(_animations[x]->transformNodes[a], a);
+                            ImGui::EndPopup();
                         }
                         draw_list->AddCircleFilled(cursorPos, nodeSize, ImGui::IsItemActive() || ImGui::IsItemHovered() ? active_color : inactive_color);
                         if (a != _animations[x]->transformNodes.size())
@@ -143,17 +158,6 @@ void Testing::Render( ) {
 
                         ImGui::PopID();
                     }
-
-
-
-
-                    const float fwidth = ImGui::GetColumnWidth();
-                    const float fheight = ImGui::GetContentRegionAvail().y;
-                    for (auto lineHorizontalPos = 0.0f; lineHorizontalPos < max_time; lineHorizontalPos += 0.5f) {
-                        draw_list->AddLine(ImVec2((cursorPos.x + win->Size.x * 0.5f) + lineHorizontalPos/ max_time  , cursorPos.y), ImVec2((cursorPos.x + win->Size.x * 0.5f) + lineHorizontalPos / max_time, cursorPos.y + fheight), ImColor(0.0f, 0.0f, 1.0f, 0.6f));
-                    }
-
-                    
 
                     ImGui::EndChild();
                     ImGui::EndGroup();

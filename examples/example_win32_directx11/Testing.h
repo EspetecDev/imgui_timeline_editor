@@ -39,10 +39,17 @@ struct Animation {
         ImGui::Text("Color");
         ImGui::Text("");
         ImGui::Text("Node: %d", id);
-        ImGui::ColorEdit4("MyColor##2f", (float*)& node.first, ImGuiColorEditFlags_Float);
+        ImGui::Text("Color: RGBA: %.2f %.2f %.2f %.2f", node.first.x, node.first.y, node.first.z, node.first.w);
+        ImGui::SameLine();
+        ImGui::ColorEdit4("##2f", (float*)& node.first, ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
         ImGui::Text("Time: %.2f", node.second);
     }
-    void displaySpecialPopup() {}
+    //virtual void displaySpecialPopup() = 0;
+
+    static void displayTransformContextMenu(std::pair<VEC2, float> node, int id) {
+        ImGui::Text("Transform");
+        ImGui::DragFloat2("##transform", &node.first.x, 0.01f, -100.0f, 100.0f, "%.2f");
+    }
 
     std::string name;
     std::vector<std::pair<VEC2, float>> transformNodes;
